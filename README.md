@@ -46,4 +46,14 @@ The exact fix was to stop using the LLM as the source of truth for collected fie
 
 ## Web App Interface
 
+<img width="2880" height="1654" alt="llm-driven-entity-extraction-chatbot-ayaz vercel app_" src="https://github.com/user-attachments/assets/44dab86f-3bdb-47b1-83ed-27a40f1c826c" />
+
+
+## Mobile Interface
+
+<img width="421" height="820" alt="image" src="https://github.com/user-attachments/assets/f462c4a6-bc20-4e31-9660-1fb42b0e2dfe" />
+
+
+
+
 
