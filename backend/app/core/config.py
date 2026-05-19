@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    openai_api_key: str
+    openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     # Comma-separated production origins (e.g. Vercel URL). Optional for local dev.
     cors_origins: str = ""
