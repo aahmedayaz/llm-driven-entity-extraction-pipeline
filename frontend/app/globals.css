@@ -1,0 +1,45 @@
+@import "../styles/theme.css";
+@import "../styles/anthropic-serif.css";
+@import "../styles/celebration.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg-base);
+    color: var(--text-primary);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Anthropic Serif", Georgia, "Times New Roman", serif;
+  }
+
+  .greeting-heading {
+    font-family: "Anthropic Serif", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    /* letter-spacing: 0.06em; */
+    /* word-spacing: 0.12em; */
+    line-height: 1.25;
+  }
+
+  .surface-elevated {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .surface-input {
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+  }
+}

@@ -1,0 +1,27 @@
+/* Anthropic Serif — matches Claude / Anthropic product typography */
+@font-face {
+  font-family: "Anthropic Serif";
+  src: url("https://cdn.jsdelivr.net/gh/devchauhann/fonts@main/cdn/v1/fonts/AnthropicSerif@400.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Anthropic Serif";
+  src: url("https://cdn.jsdelivr.net/gh/devchauhann/fonts@main/cdn/v1/fonts/AnthropicSerif@500.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Anthropic Serif";
+  src: url("https://cdn.jsdelivr.net/gh/devchauhann/fonts@main/cdn/v1/fonts/AnthropicSerif@600.woff2")
+    format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
