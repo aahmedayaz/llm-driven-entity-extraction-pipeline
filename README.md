@@ -2,6 +2,8 @@
 
 AI-powered conversational web app that collects structured property information through natural chat and returns final JSON output when all required fields are gathered.
 
+Frontend Live URL: https://llm-driven-entity-extraction-chatbot-ayaz.vercel.app
+
 ## Features
 
 - Natural language chat with OpenAI
