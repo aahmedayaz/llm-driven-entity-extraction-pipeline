@@ -112,7 +112,7 @@ export function JsonCelebrationModal({
                 onClick={() => void handleCopy()}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-xl border-2 border-slate-900 px-3 py-2 text-xs font-semibold transition",
-                  "bg-white hover:bg-yellow-50",
+                  "bg-white text-slate-900 hover:bg-yellow-50 hover:text-slate-950",
                 )}
               >
                 <Copy className="h-3.5 w-3.5" aria-hidden />
