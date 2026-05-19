@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Property Assistant | Team Ralico",
   description:
-    "Collect property details through natural conversation and receive structured JSON output.",
+    "Collect property details through natural conversation and receive a structured JSON output.",
 };
 
 export default function RootLayout({
