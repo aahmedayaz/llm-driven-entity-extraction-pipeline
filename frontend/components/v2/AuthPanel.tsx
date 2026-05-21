@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LogIn, LogOut, User } from "lucide-react";
 
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -22,14 +22,14 @@ export function AuthPanel({ onAuthChange, className }: AuthPanelProps) {
 
   const supabase = isSupabaseConfigured() ? getSupabaseClient() : null;
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     if (!supabase) {
       return;
     }
     const { data } = await supabase.auth.getUser();
     setUserEmail(data.user?.email ?? null);
     onAuthChange?.();
-  };
+  }, [supabase, onAuthChange]);
 
   useEffect(() => {
     void refreshUser();
@@ -40,14 +40,10 @@ export function AuthPanel({ onAuthChange, className }: AuthPanelProps) {
       void refreshUser();
     });
     return () => sub.subscription.unsubscribe();
-  }, [supabase]);
+  }, [supabase, refreshUser]);
 
   if (!supabase) {
-    return (
-      <p className={cn("text-xs text-[var(--text-muted)]", className)}>
-        Sign-in unavailable (Supabase not configured).
-      </p>
-    );
+    return null;
   }
 
   const handleSubmit = async () => {
@@ -104,10 +100,9 @@ export function AuthPanel({ onAuthChange, className }: AuthPanelProps) {
 
       {expanded && (
         <div className="absolute right-0 top-full z-40 mt-2 w-72 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 shadow-xl">
-          <p className="mb-3 text-xs text-[var(--text-secondary)]">
-            Use the app without signing in. Sign in only to save surveys and
-            property reports.
-          </p>
+        <p className="mb-3 text-xs leading-relaxed text-[var(--text-secondary)]">
+          No sign-in needed to use the app. Sign in only to save your surveys.
+        </p>
           <div className="mb-2 flex gap-2 text-xs">
             <button
               type="button"
@@ -129,14 +124,16 @@ export function AuthPanel({ onAuthChange, className }: AuthPanelProps) {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mb-2 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-input)] px-3 py-2 text-sm"
+            className="mb-2 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[#9fca72]/40"
+            autoComplete="email"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mb-2 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-input)] px-3 py-2 text-sm"
+            className="mb-2 w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[#9fca72]/40"
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
           />
           {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
           <button

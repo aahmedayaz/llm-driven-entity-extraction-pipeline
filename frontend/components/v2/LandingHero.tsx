@@ -1,59 +1,71 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, MapPin, MessageSquare, Mic } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, MapPin, Mic } from "lucide-react";
 
 import { JourneyOrb } from "@/components/v2/JourneyOrb";
+import { RobotPeekingGuide } from "@/components/v2/RobotPeekingGuide";
+import { cn } from "@/lib/utils";
+
+const LANDING_BTN =
+  "box-border inline-flex h-12 min-h-12 w-full items-center justify-between gap-3 rounded-2xl border-2 px-4 text-[0.75rem] font-semibold leading-none transition active:scale-[0.98] xs:px-5 xs:text-xs sm:flex-1 sm:text-sm";
 
 export function LandingHero() {
   return (
-    <div className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center px-4 py-12 text-center sm:py-16">
-      <JourneyOrb active className="mb-8" />
-      <motion.h1
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="greeting-heading max-w-2xl text-3xl text-[var(--text-primary)] sm:text-4xl md:text-5xl"
-      >
-        Is solar right for{" "}
-        <span className="text-[#9fca72]">your home</span>?
-      </motion.h1>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="mt-4 max-w-lg text-sm leading-relaxed text-[var(--text-secondary)] sm:text-base"
-      >
-        A quick property survey and real UK address insights — no account needed.
-        Sign in only if you want to save your history.
-      </motion.p>
+    <>
+      <RobotPeekingGuide message="Tip: answer several details in one message on the assessment — your dossier fills automatically." />
+      <div className="page-x mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-start py-8 text-center sm:justify-center sm:py-14">
+      <JourneyOrb active className="mb-6 shrink-0 sm:mb-8" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center"
-      >
+      <h1 className="max-w-[20rem] font-sans text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)] xs:max-w-md xs:text-2xl sm:max-w-2xl sm:text-3xl md:text-4xl">
+        Instant <span className="text-[#9fca72]">AI solar scan</span> for your
+        home
+      </h1>
+
+      <p className="mt-4 max-w-[19rem] text-[0.6875rem] leading-relaxed text-[var(--text-secondary)] xs:max-w-md xs:text-xs sm:max-w-lg sm:text-sm">
+        Answer five quick questions by voice or keyboard. Add your UK postcode
+        to pull real EPC data and estimated solar savings. No account needed.
+      </p>
+
+      <div className="mt-8 flex w-full max-w-lg flex-col gap-3 sm:max-w-2xl sm:flex-row sm:items-stretch">
         <Link
           href="/survey"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#6f8f4e] px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-110"
+          className={cn(
+            LANDING_BTN,
+            "whitespace-nowrap border-[#6f8f4e] bg-[#6f8f4e] text-white shadow-lg hover:brightness-110",
+          )}
         >
-          <Mic className="h-4 w-4" />
-          Start property survey
-          <ArrowRight className="h-4 w-4" />
+          <span className="flex min-w-0 items-center gap-2.5">
+            <Mic className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="truncate">Start AI Property Assessment</span>
+          </span>
+          <ArrowRight
+            className="h-4 w-4 shrink-0 text-white/90"
+            aria-hidden
+          />
         </Link>
         <Link
           href="/property"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-6 py-3.5 text-sm font-medium text-[var(--text-primary)] transition hover:border-[#9fca72]/40"
+          className={cn(
+            LANDING_BTN,
+            "whitespace-nowrap border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:border-[#9fca72]/40",
+          )}
         >
-          <MapPin className="h-4 w-4 text-[#9fca72]" />
-          Postcode solar check
+          <span className="flex min-w-0 items-center gap-2.5">
+            <MapPin className="h-4 w-4 shrink-0 text-[#9fca72]" aria-hidden />
+            <span className="truncate">Start EPC and Solar Assessment</span>
+          </span>
+          <ArrowRight
+            className="h-4 w-4 shrink-0 text-[var(--text-secondary)]"
+            aria-hidden
+          />
         </Link>
-      </motion.div>
+      </div>
 
-      <p className="mt-6 text-xs text-[var(--text-muted)]">
-        Private · No login required · Deterministic extraction (minimal AI cost)
+      <p className="mt-6 px-2 text-[0.6875rem] leading-relaxed text-[var(--text-muted)] xs:text-xs">
+        Private · No login required · Smart extraction (low AI usage)
       </p>
     </div>
+    </>
   );
 }

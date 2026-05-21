@@ -1,54 +1,65 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, MapPin, Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, Search } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
+import { AddressListSkeleton, Skeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/components/ui/Toast";
 import { SolarInsightsReport } from "@/components/v2/SolarInsightsReport";
-import { RobotPeekingGuide } from "@/components/v2/RobotPeekingGuide";
 import {
   fetchAddressesByPostcode,
   fetchPropertyInsights,
-  savePropertyReport,
   type AddressItem,
   type PropertyInsights,
 } from "@/lib/property-api";
-import { cn } from "@/lib/utils";
-
-type Step = "postcode" | "select" | "loading" | "report";
+type Step = "postcode" | "select" | "report";
 
 export function PropertyInsightsFlow() {
+  const toast = useToast();
   const [step, setStep] = useState<Step>("postcode");
   const [postcode, setPostcode] = useState("");
   const [addresses, setAddresses] = useState<AddressItem[]>([]);
   const [selected, setSelected] = useState<AddressItem | null>(null);
   const [insights, setInsights] = useState<PropertyInsights | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingUprn, setLoadingUprn] = useState<number | null>(null);
 
   const handleSearch = async () => {
     setError(null);
-    setSaveMsg(null);
-    if (!postcode.trim()) {
+    const trimmed = postcode.trim();
+    if (!trimmed) {
+      toast.error("Enter a UK postcode to search.");
       return;
     }
-    setStep("loading");
+    setIsSearching(true);
     try {
-      const result = await fetchAddressesByPostcode(postcode);
+      const result = await fetchAddressesByPostcode(trimmed);
       setAddresses(result.addresses);
-      setStep("select");
+      setPostcode(trimmed);
       if (result.addresses.length === 0) {
         setError("No addresses found for this postcode.");
+        toast.error("No addresses found for this postcode.");
+        setStep("postcode");
+      } else {
+        setStep("select");
+        toast.success(`Found ${result.addresses.length} address(es).`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Search failed");
+      const message =
+        err instanceof Error ? err.message : "Postcode search failed";
+      setError(message);
+      toast.error(message);
       setStep("postcode");
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleSelect = async (address: AddressItem) => {
     setSelected(address);
-    setStep("loading");
+    setLoadingUprn(address.uprn);
     setError(null);
     try {
       const data = await fetchPropertyInsights(address.uprn);
@@ -58,151 +69,134 @@ export function PropertyInsightsFlow() {
         `ralico_insights_${address.uprn}`,
         JSON.stringify({ address: address.address, postcode, data }),
       );
+      toast.success("EPC and solar assessment loaded.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load insights");
+      const message =
+        err instanceof Error ? err.message : "Could not load property insights";
+      setError(message);
+      toast.error(message);
       setStep("select");
-    }
-  };
-
-  const handleSave = async () => {
-    if (!insights || !selected) {
-      return;
-    }
-    setSaveMsg(null);
-    try {
-      await savePropertyReport({
-        uprn: insights.uprn,
-        postcode,
-        address: selected.address,
-        epc: insights.epc,
-        solar: insights.solar,
-      });
-      setSaveMsg("Saved to your account.");
-    } catch (err) {
-      setSaveMsg(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setLoadingUprn(null);
     }
   };
 
   return (
     <>
-      <RobotPeekingGuide message="Enter your UK postcode, pick your address, and we'll pull EPC + solar assessment data." />
-
-      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <AnimatePresence mode="wait">
-          {step === "postcode" && (
-            <motion.div
-              key="postcode"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mx-auto max-w-lg"
-            >
-              <h1 className="greeting-heading text-2xl text-[var(--text-primary)] sm:text-3xl">
-                Property insights by postcode
-              </h1>
-              <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                Works without signing in. Sign in to save reports to your account.
-              </p>
-              <div className="mt-6 flex gap-2">
-                <div className="surface-input flex flex-1 items-center gap-2 rounded-2xl px-3 py-2">
-                  <MapPin className="h-4 w-4 text-[#9fca72]" />
-                  <input
-                    value={postcode}
-                    onChange={(e) => setPostcode(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && void handleSearch()}
-                    placeholder="e.g. GU10 5LU"
-                    className="w-full bg-transparent text-sm focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void handleSearch()}
-                  className="flex items-center gap-2 rounded-2xl bg-[#6f8f4e] px-4 py-2 text-sm font-medium text-white"
-                >
-                  <Search className="h-4 w-4" />
-                  Search
-                </button>
+      <div className="page-x mx-auto w-full max-w-4xl flex-1 py-6 sm:py-8">
+        {step === "postcode" && (
+          <div className="mx-auto max-w-lg">
+            <h1 className="greeting-heading text-2xl text-[var(--text-primary)] sm:text-3xl">
+              EPC & solar assessment
+            </h1>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Enter your UK postcode to find your address and view EPC plus
+              solar savings data. No account required.
+            </p>
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+              <div className="surface-input flex min-h-[44px] flex-1 items-center gap-2 rounded-2xl px-3 py-2">
+                <MapPin className="h-4 w-4 shrink-0 text-[#9fca72]" />
+                <input
+                  value={postcode}
+                  onChange={(e) => setPostcode(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && void handleSearch()}
+                  placeholder="e.g. GU10 5LU"
+                  disabled={isSearching}
+                  className="w-full bg-transparent text-sm text-[var(--text-primary)] focus:outline-none disabled:opacity-50"
+                  autoComplete="postal-code"
+                />
               </div>
-              {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-            </motion.div>
-          )}
+              <Button
+                type="button"
+                loading={isSearching}
+                onClick={() => void handleSearch()}
+                className="shrink-0 sm:min-w-[7.5rem]"
+              >
+                <Search className="h-4 w-4" />
+                Search
+              </Button>
+            </div>
+            {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+          </div>
+        )}
 
-          {step === "select" && (
-            <motion.div
-              key="select"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-3"
-            >
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                Select your address
-              </h2>
-              <p className="text-sm text-[var(--text-secondary)]">
-                {addresses.length} addresses in {postcode}
-              </p>
+        {step === "select" && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Select your address
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {isSearching
+                ? "Searching…"
+                : `${addresses.length} addresses in ${postcode}`}
+            </p>
+
+            {isSearching ? (
+              <AddressListSkeleton count={5} />
+            ) : (
               <ul className="max-h-[50vh] space-y-2 overflow-y-auto">
                 {addresses.map((addr) => (
                   <li key={addr.uprn}>
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
+                      fullWidth
+                      loading={loadingUprn === addr.uprn}
+                      disabled={loadingUprn !== null && loadingUprn !== addr.uprn}
                       onClick={() => void handleSelect(addr)}
-                      className={cn(
-                        "w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-4 py-3 text-left text-sm transition",
-                        "hover:border-[#9fca72]/40 hover:bg-[#6f8f4e]/10",
-                      )}
+                      className="h-auto min-h-[52px] justify-start rounded-xl py-3 text-left text-sm font-normal"
                     >
                       {addr.address}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                className="text-sm text-[var(--text-secondary)] underline"
-                onClick={() => setStep("postcode")}
-              >
-                Change postcode
-              </button>
-            </motion.div>
-          )}
+            )}
 
-          {step === "loading" && (
-            <motion.div
-              key="loading"
-              className="flex flex-col items-center justify-center py-20"
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setStep("postcode");
+                setError(null);
+                setAddresses([]);
+              }}
+              disabled={loadingUprn !== null}
             >
-              <Loader2 className="h-10 w-10 animate-spin text-[#9fca72]" />
-              <p className="mt-4 text-sm text-[var(--text-secondary)]">
-                Fetching EPC and solar assessment…
-              </p>
-            </motion.div>
-          )}
+              Change postcode
+            </Button>
+          </div>
+        )}
 
-          {step === "report" && insights && selected && (
-            <motion.div key="report" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <button
-                  type="button"
-                  className="text-sm text-[var(--text-secondary)] underline"
-                  onClick={() => setStep("select")}
-                >
-                  ← Pick another address
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleSave()}
-                  className="rounded-full border border-[#9fca72]/30 bg-[#6f8f4e]/15 px-4 py-1.5 text-xs font-medium text-[#9fca72]"
-                >
-                  Save to account (sign in required)
-                </button>
-              </div>
-              {saveMsg && (
-                <p className="mb-4 text-sm text-[var(--text-secondary)]">{saveMsg}</p>
-              )}
-              <SolarInsightsReport insights={insights} address={selected.address} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {step === "report" && insights && selected && (
+          <div>
+            <div className="mb-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setStep("select");
+                  setInsights(null);
+                }}
+              >
+                ← Pick another address
+              </Button>
+            </div>
+            <SolarInsightsReport
+              insights={insights}
+              address={selected.address}
+            />
+          </div>
+        )}
+
+        {loadingUprn !== null && step === "select" && (
+          <div className="mt-6 space-y-3 rounded-2xl border border-[var(--border-subtle)] p-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Fetching EPC and solar assessment…
+            </p>
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        )}
       </div>
     </>
   );

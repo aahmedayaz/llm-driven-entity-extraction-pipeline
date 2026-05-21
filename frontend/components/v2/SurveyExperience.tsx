@@ -1,60 +1,44 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 
 import { JsonCelebrationModal } from "@/components/chat/JsonCelebrationModal";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import { PropertyDossier } from "@/components/v2/PropertyDossier";
-import { RobotPeekingGuide } from "@/components/v2/RobotPeekingGuide";
+import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import { VoiceChatInput } from "@/components/v2/VoiceChatInput";
 import { JourneyOrb } from "@/components/v2/JourneyOrb";
 import { INITIAL_ASSISTANT_GREETING } from "@/lib/constants";
-import { getSupabaseClient } from "@/lib/supabase/client";
 import { useChat } from "@/lib/useChat";
 
 export function SurveyExperience() {
+  const toast = useToast();
   const {
     messages,
     isLoading,
     isComplete,
     propertyData,
-    dossierData,
     error,
     hasConversation,
     sendMessage,
     retry,
-    enablePersistence,
-  } = useChat({ persist: true });
+  } = useChat();
 
   const [showJsonModal, setShowJsonModal] = useState(false);
 
   useEffect(() => {
     if (isComplete && propertyData) {
       setShowJsonModal(true);
+      toast.success("Property assessment complete!");
     }
-  }, [propertyData, isComplete]);
+  }, [propertyData, isComplete, toast]);
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      return;
+    if (error) {
+      toast.error(error);
     }
-    const tryPersist = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        await enablePersistence();
-      }
-    };
-    void tryPersist();
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) {
-        void enablePersistence();
-      }
-    });
-    return () => sub.subscription.unsubscribe();
-  }, [enablePersistence]);
+  }, [error, toast]);
 
   const onSend = useCallback(
     (text: string) => {
@@ -65,9 +49,7 @@ export function SurveyExperience() {
 
   return (
     <>
-      <RobotPeekingGuide message="Tip: you can answer several details in one message — I'll fill your dossier automatically." />
-
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:py-6">
+      <div className="page-x mx-auto flex h-full w-full max-w-3xl flex-1 flex-col gap-4 py-4 lg:py-6">
         <div className="flex min-h-0 flex-1 flex-col">
           {!hasConversation ? (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
@@ -76,22 +58,30 @@ export function SurveyExperience() {
                 {INITIAL_ASSISTANT_GREETING}
               </p>
               <div className="mt-6 w-full max-w-lg">
-                <VoiceChatInput onSend={onSend} disabled={isLoading} />
+                <VoiceChatInput onSend={onSend} sending={isLoading} />
               </div>
             </div>
           ) : (
             <div className="surface-elevated flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl">
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
                 {messages.map((m, i) => (
-                  <MessageBubble key={`${m.role}-${i}`} role={m.role} content={m.content} />
+                  <MessageBubble
+                    key={`${m.role}-${i}`}
+                    role={m.role}
+                    content={m.content}
+                  />
                 ))}
                 {isLoading && <TypingIndicator />}
                 {error && (
                   <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
                     <p>{error}</p>
-                    <button type="button" onClick={retry} className="mt-2 underline">
+                    <Button
+                      variant="ghost"
+                      className="mt-2 h-auto min-h-0 p-0 text-red-300"
+                      onClick={retry}
+                    >
                       Start over
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -99,14 +89,15 @@ export function SurveyExperience() {
                 <VoiceChatInput
                   onSend={onSend}
                   disabled={isLoading || isComplete}
-                  placeholder={isComplete ? "Survey complete" : "Type or speak your answer…"}
+                  sending={isLoading}
+                  placeholder={
+                    isComplete ? "Survey complete" : "Type or speak your answer…"
+                  }
                 />
               </div>
             </div>
           )}
         </div>
-
-        <PropertyDossier data={dossierData} className="w-full shrink-0 lg:w-80" />
       </div>
 
       {propertyData && (

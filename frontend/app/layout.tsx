@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { DevChunkRecovery } from "@/components/DevChunkRecovery";
+import { Providers } from "@/app/providers";
 import { AppShell } from "@/components/v2/AppShell";
 import "./globals.css";
 
@@ -30,7 +32,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} h-full font-sans`}
       >
-        <AppShell>{children}</AppShell>
+        <DevChunkRecovery />
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );
