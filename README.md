@@ -2,7 +2,9 @@
 
 AI-powered conversational web app that collects structured property information through natural chat and returns final JSON output when all required fields are gathered.
 
-Frontend Live URL: https://llm-driven-entity-extraction-chatbot-ayaz.vercel.app
+**V1 (frozen):** branch `version-1` · [Live demo](https://llm-driven-entity-extraction-chatbot-ayaz.vercel.app)
+
+**V2 (active):** branch `version-2` — Supabase auth/history, HomeData postcode insights, voice input, property dossier UI. See [docs/V2-SETUP.md](docs/V2-SETUP.md).
 
 ## Features
 

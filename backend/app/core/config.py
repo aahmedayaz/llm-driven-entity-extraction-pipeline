@@ -6,6 +6,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+    homedata_api_key: str = ""
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
     # Comma-separated production origins (e.g. Vercel URL). Optional for local dev.
     cors_origins: str = ""
     # Allow http://localhost:<any-port> and http://127.0.0.1:<any-port>

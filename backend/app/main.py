@@ -4,14 +4,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.routes import chat
+from app.routes import chat, conversations, property
 
 settings = get_settings()
 
 app = FastAPI(
     title="Property Chat API",
     description="AI-powered property information collection",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 cors_kwargs: dict = {
@@ -29,6 +29,8 @@ if settings.cors_localhost_regex:
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 app.include_router(chat.router)
+app.include_router(conversations.router)
+app.include_router(property.router)
 
 
 @app.get("/health")

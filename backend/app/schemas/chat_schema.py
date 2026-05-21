@@ -20,6 +20,7 @@ class PropertyData(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(min_length=1)
+    conversation_id: str | None = None
 
 
 class ChatResponse(BaseModel):

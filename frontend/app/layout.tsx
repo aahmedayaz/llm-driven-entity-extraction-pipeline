@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { AppShell } from "@/components/v2/AppShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Property Assistant | Team Ralico",
+  title: "Ralico Property AI | Team Ralico",
   description:
-    "Collect property details through natural conversation and receive a structured JSON output.",
+    "Property survey, UK postcode insights, EPC and solar assessment — v2",
 };
 
 export default function RootLayout({
@@ -29,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} h-full font-sans`}
       >
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

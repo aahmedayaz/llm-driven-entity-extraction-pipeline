@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { sendChatMessage, ChatApiError } from "@/lib/api";
+import { createConversation } from "@/lib/conversations-api";
 import { INITIAL_ASSISTANT_GREETING } from "@/lib/constants";
 import type { ChatApiResponse, ChatMessage, PropertyData } from "@/lib/types";
 
@@ -11,6 +12,7 @@ interface ChatState {
   isLoading: boolean;
   isComplete: boolean;
   propertyData: PropertyData | null;
+  partialData: PropertyData | null;
   error: string | null;
   retryAfterSeconds: number | null;
 }
@@ -21,6 +23,7 @@ function createInitialState(): ChatState {
     isLoading: false,
     isComplete: false,
     propertyData: null,
+    partialData: null,
     error: null,
     retryAfterSeconds: null,
   };
@@ -40,15 +43,33 @@ function buildStateFromResponse(
     isLoading: false,
     isComplete: response.complete,
     propertyData: response.complete ? (response.data ?? null) : null,
+    partialData: response.data ?? null,
     error: null,
     retryAfterSeconds: null,
   };
 }
 
-export function useChat() {
+interface UseChatOptions {
+  persist?: boolean;
+}
+
+export function useChat(options: UseChatOptions = {}) {
   const [state, setState] = useState<ChatState>(createInitialState);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const hasConversation = state.messages.some((message) => message.role === "user");
+
+  const enablePersistence = useCallback(async () => {
+    if (!options.persist || conversationId) {
+      return;
+    }
+    try {
+      const id = await createConversation();
+      setConversationId(id);
+    } catch {
+      // User not signed in — guest mode only
+    }
+  }, [options.persist, conversationId]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -73,7 +94,7 @@ export function useChat() {
       }));
 
       try {
-        const response = await sendChatMessage(nextMessages);
+        const response = await sendChatMessage(nextMessages, conversationId);
         setState(buildStateFromResponse(nextMessages, response));
       } catch (error) {
         const message =
@@ -91,22 +112,36 @@ export function useChat() {
         }));
       }
     },
-    [state.isComplete, state.isLoading, state.messages],
+    [state.isComplete, state.isLoading, state.messages, conversationId],
   );
 
   const retry = useCallback(() => {
     setState(createInitialState());
+    setConversationId(null);
   }, []);
+
+  const dossierData: PropertyData =
+    state.propertyData ??
+    state.partialData ?? {
+      propertyType: undefined,
+      annualElectricityBill: undefined,
+      occupants: undefined,
+      heatingSystem: undefined,
+      interest: undefined,
+    };
 
   return {
     messages: state.messages,
     isLoading: state.isLoading,
     isComplete: state.isComplete,
     propertyData: state.propertyData,
+    dossierData,
     error: state.error,
     retryAfterSeconds: state.retryAfterSeconds,
     hasConversation,
     sendMessage,
     retry,
+    conversationId,
+    enablePersistence,
   };
 }

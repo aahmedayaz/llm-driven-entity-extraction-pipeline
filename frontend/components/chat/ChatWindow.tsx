@@ -13,7 +13,7 @@ import { getTeamGreeting } from "@/lib/greeting";
 import { useChat } from "@/lib/useChat";
 import { cn } from "@/lib/utils";
 
-function CornerAssistantIcon() {
+export function CornerAssistantIcon() {
   const [isCardOpen, setIsCardOpen] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

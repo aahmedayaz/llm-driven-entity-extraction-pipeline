@@ -1,3 +1,4 @@
+import { buildAuthHeaders } from "@/lib/auth-headers";
 import type { ChatApiResponse, ChatMessage } from "./types";
 
 const API_BASE_URL =
@@ -36,11 +37,15 @@ function parseErrorDetail(body: unknown): string | undefined {
 
 export async function sendChatMessage(
   messages: ChatMessage[],
+  conversationId?: string | null,
 ): Promise<ChatApiResponse> {
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    headers: await buildAuthHeaders(),
+    body: JSON.stringify({
+      messages,
+      conversation_id: conversationId ?? undefined,
+    }),
   });
 
   if (!response.ok) {

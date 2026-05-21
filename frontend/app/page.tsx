@@ -1,9 +1,5 @@
-import { ChatWindow } from "@/components/chat/ChatWindow";
+import { LandingHero } from "@/components/v2/LandingHero";
 
 export default function HomePage() {
-  return (
-    <main className="flex h-dvh flex-col overflow-hidden bg-[var(--bg-base)]">
-      <ChatWindow />
-    </main>
-  );
+  return <LandingHero />;
 }
