@@ -1,8 +1,8 @@
+import { getApiBaseUrl } from "@/lib/api-base-url";
 import { buildAuthHeaders } from "@/lib/auth-headers";
 import type { ChatApiResponse, ChatMessage } from "./types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 export class ChatApiError extends Error {
   readonly statusCode: number;

@@ -1,8 +1,8 @@
+import { getApiBaseUrl } from "@/lib/api-base-url";
 import { buildAuthHeaders } from "@/lib/auth-headers";
 import type { ChatMessage, PropertyData } from "@/lib/types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ConversationSummary {
   id: string;

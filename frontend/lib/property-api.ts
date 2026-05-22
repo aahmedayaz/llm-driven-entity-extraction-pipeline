@@ -1,7 +1,7 @@
+import { getApiBaseUrl } from "@/lib/api-base-url";
 import { buildAuthHeaders } from "@/lib/auth-headers";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+const API_BASE_URL = getApiBaseUrl();
 
 export interface AddressItem {
   uprn: number;
