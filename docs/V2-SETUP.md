@@ -27,7 +27,7 @@ Never commit real keys. Do not put `HOMEDATA_API_KEY` in the frontend.
 
 ```env
 # Must include https:// (no protocol = broken relative URLs on Vercel)
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8001
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
@@ -46,6 +46,17 @@ V2 Vercel settings: **Root Directory** = `frontend`.
 cd "e:\Ayaz Work\llm-driven-entity-extraction-pipeline"
 vercel deploy --prod --yes
 ```
+
+## Local backend
+
+Port **8001** (8000 is often used by other apps):
+
+```powershell
+cd backend
+.\scripts\run.ps1
+```
+
+Survey chat uses **OpenAI** with merged field extraction (corrections allowed, no re-asking filled fields).
 
 ## Features without login
 

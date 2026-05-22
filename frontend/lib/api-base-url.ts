@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+const DEFAULT_API_BASE_URL = "http://localhost:8001";
 
 /** Ensures NEXT_PUBLIC_API_URL is absolute (Vercel often omits https://). */
 export function getApiBaseUrl(): string {
