@@ -22,6 +22,26 @@ llm-driven-entity-extraction-pipeline/
 └── README.md
 ```
 
+## Run locally
+
+Port **8000** is often taken by other apps (e.g. another FastAPI project). This repo uses **8001** for the Property Chat API.
+
+**Backend** (from `backend/`):
+
+```powershell
+.\scripts\install.ps1   # first time only
+.\scripts\run.ps1       # http://localhost:8001 — docs at /docs, health at /health
+```
+
+**Frontend** (from `frontend/`):
+
+```powershell
+npm install
+npm run dev
+```
+
+Set `NEXT_PUBLIC_API_URL=http://localhost:8001` in `frontend/.env.local`.
+
 ## LLM API used
 
 The project uses the paid OpenAI API, originally configured with `gpt-4o-mini`.

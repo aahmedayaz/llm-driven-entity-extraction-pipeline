@@ -59,6 +59,13 @@ def _extract_property_type(text: str) -> str | None:
 
 
 def _extract_bill(text: str) -> float | None:
+    lowered = text.lower()
+    k_match = re.search(r"([\d][\d,]*(?:\.\d+)?)\s*k(?:\s|$|[^a-z])", lowered)
+    if k_match:
+        value = float(k_match.group(1).replace(",", "")) * 1000
+        if 50 <= value <= 50_000:
+            return value
+
     for match in re.finditer(r"£?\s*([\d][\d,]*(?:\.\d+)?)", text):
         value = float(match.group(1).replace(",", ""))
         if 50 <= value <= 50_000:
@@ -90,13 +97,18 @@ def _extract_occupants(text: str) -> int | None:
 
 def _extract_heating(text: str) -> str | None:
     lowered = text.lower()
+    has_lpg = bool(re.search(r"\blpg\b", lowered))
+    has_oil = bool(re.search(r"\boil\b", lowered))
+    if has_lpg and has_oil:
+        return None
+
     if "gas" in lowered and "boiler" in lowered:
         return "gas boiler"
     if re.search(r"\bgas\b", lowered):
         return "gas boiler"
-    if re.search(r"\boil\b", lowered):
+    if has_oil:
         return "oil"
-    if re.search(r"\blpg\b", lowered):
+    if has_lpg:
         return "LPG"
     if "electric" in lowered:
         return "electric"
@@ -107,14 +119,23 @@ def _extract_heating(text: str) -> str | None:
 
 def _extract_interest(text: str) -> str | None:
     lowered = text.lower()
-    has_solar = "solar" in lowered
-    has_battery = "battery" in lowered or "storage" in lowered
+    rejects_battery = bool(
+        re.search(
+            r"(not|no|without|only)\s+.*(battery|solar\s*\+\s*battery)|not\s+solar\s*\+\s*battery",
+            lowered,
+        )
+    )
+    wants_battery = bool(
+        re.search(r"solar\s*\+\s*battery|battery\s+storage|solar\s+and\s+battery", lowered)
+    ) and not rejects_battery
 
-    if has_solar and has_battery:
+    if wants_battery:
         return "solar + battery storage"
-    if has_battery:
-        return "solar + battery storage"
-    if "solar only" in lowered or (has_solar and not has_battery):
+    if "solar only" in lowered or (
+        "solar" in lowered and (rejects_battery or "only solar" in lowered)
+    ):
+        return "solar only"
+    if "solar" in lowered and not rejects_battery and "battery" not in lowered:
         return "solar only"
     return None
 
@@ -133,14 +154,37 @@ def _extract_field(field: str, text: str) -> str | float | int | None:
     return None
 
 
+def collect_fields_from_messages(
+    messages: list[dict[str, str]],
+) -> dict[str, str | float | int | None]:
+    """Scan all user messages; later messages override earlier values for the same field."""
+    return _collect_fields(messages)
+
+
+def next_missing_field(collected: dict[str, str | float | int | None]) -> str | None:
+    return _next_missing_field(collected)
+
+
+def survey_prompt_for_field(
+    messages: list[dict[str, str]],
+    field: str,
+) -> str:
+    """Canonical question for the next empty field (matches deterministic survey flow)."""
+    collected = _collect_fields(messages)
+    last_text = _last_user_text(messages)
+    if last_text and _extract_field(field, last_text) is None and any(
+        collected[f] is not None for f in FIELD_ORDER
+    ):
+        return CLARIFY[field]
+    return QUESTIONS[field]
+
+
 def _collect_fields(messages: list[dict[str, str]]) -> dict[str, str | float | int | None]:
     collected: dict[str, str | float | int | None] = {field: None for field in FIELD_ORDER}
     user_texts = _user_messages(messages)
 
     for field in FIELD_ORDER:
         for text in user_texts:
-            if collected[field] is not None:
-                break
             value = _extract_field(field, text)
             if value is not None:
                 collected[field] = value
