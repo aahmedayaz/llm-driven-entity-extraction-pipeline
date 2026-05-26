@@ -164,9 +164,14 @@ export function ChatWindow() {
     if (!container) {
       return;
     }
-    container.scrollTo({
-      top: container.scrollHeight,
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+    container.scrollIntoView({
       behavior: "smooth",
+      block: "end",
     });
   }, [messages, isLoading, propertyData, error, hasConversation]);
 
@@ -203,7 +208,7 @@ export function ChatWindow() {
         />
       )}
 
-      <section className="mx-auto flex h-full w-full max-w-3xl min-h-0 flex-1 flex-col px-4 pb-4 pt-16 sm:px-6 sm:py-4">
+      <section className="mx-auto flex w-full max-w-3xl flex-col px-4 pb-4 pt-16 sm:min-h-dvh sm:px-6 sm:py-4">
         <header className="mb-4 shrink-0 border-b border-[var(--border-subtle)] pb-4">
           <div className="flex items-center gap-3">
             <AnthropicMarkIcon className="h-7 w-7 shrink-0 text-[var(--accent-coral)] sm:h-8 sm:w-8" />
@@ -216,10 +221,10 @@ export function ChatWindow() {
           </p>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
+        <div className="flex flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)]">
           <div
             ref={messagesScrollRef}
-            className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-6"
+            className="space-y-4 p-4 sm:p-6"
           >
             {messages.map((message, index) => (
               <MessageBubble
