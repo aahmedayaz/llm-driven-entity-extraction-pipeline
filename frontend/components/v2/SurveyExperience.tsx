@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { JsonCelebrationModal } from "@/components/chat/JsonCelebrationModal";
 import { MessageBubble } from "@/components/chat/MessageBubble";
@@ -25,6 +25,7 @@ export function SurveyExperience() {
     retry,
   } = useChat();
 
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const [showJsonModal, setShowJsonModal] = useState(false);
 
   useEffect(() => {
@@ -47,9 +48,23 @@ export function SurveyExperience() {
     [sendMessage],
   );
 
+  useEffect(() => {
+    if (!hasConversation) {
+      return;
+    }
+    const container = messagesScrollRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, isLoading, propertyData, error, hasConversation]);
+
   return (
     <>
-      <div className="page-x mx-auto flex h-full w-full max-w-3xl flex-1 flex-col gap-4 py-4 lg:py-6">
+      <div className="page-x mx-auto flex h-full min-h-0 w-full max-w-3xl flex-1 flex-col gap-4 py-4 pb-[calc(1rem+var(--mobile-page-bottom))] sm:pb-4 lg:py-6">
         <div className="flex min-h-0 flex-1 flex-col">
           {!hasConversation ? (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
@@ -63,7 +78,10 @@ export function SurveyExperience() {
             </div>
           ) : (
             <div className="surface-elevated flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl">
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+              <div
+                ref={messagesScrollRef}
+                className="min-h-0 flex-1 touch-pan-y space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-6"
+              >
                 {messages.map((m, i) => (
                   <MessageBubble
                     key={`${m.role}-${i}`}

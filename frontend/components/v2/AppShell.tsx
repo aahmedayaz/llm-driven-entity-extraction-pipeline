@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--bg-base)]">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[var(--bg-base)]">
       <header className="relative z-50 shrink-0 overflow-visible border-b border-[var(--border-subtle)]">
         <div className="page-x mx-auto max-w-7xl overflow-visible py-5 sm:py-4">
           <div className="flex min-h-[3.5rem] items-center justify-between gap-2 overflow-visible sm:min-h-[3.25rem] sm:gap-4">
