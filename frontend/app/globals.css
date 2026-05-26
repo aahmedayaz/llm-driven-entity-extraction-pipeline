@@ -9,6 +9,7 @@
 @layer base {
   :root {
     --page-padding-x: 1rem;
+    --mobile-page-bottom: 40px;
   }
 
   @media (min-width: 375px) {
@@ -38,6 +39,7 @@
   @media (min-width: 640px) {
     :root {
       --page-padding-x: 1.5rem;
+      --mobile-page-bottom: 0px;
     }
   }
 
@@ -45,6 +47,7 @@
   body {
     min-height: 100%;
     overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* Popovers portaled to body — above app chrome, never clipped by header/main */
@@ -57,6 +60,7 @@
     @apply antialiased;
     background: var(--bg-base);
     color: var(--text-primary);
+    padding-bottom: var(--mobile-page-bottom);
   }
 
   input:-webkit-autofill,

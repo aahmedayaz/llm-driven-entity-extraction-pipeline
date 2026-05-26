@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="relative z-0 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+      <main className="relative z-0 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pb-[var(--mobile-page-bottom)]">
         {children}
       </main>
     </div>

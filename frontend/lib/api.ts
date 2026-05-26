@@ -35,18 +35,37 @@ function parseErrorDetail(body: unknown): string | undefined {
   return undefined;
 }
 
+const CHAT_REQUEST_TIMEOUT_MS = 90_000;
+
 export async function sendChatMessage(
   messages: ChatMessage[],
   conversationId?: string | null,
 ): Promise<ChatApiResponse> {
-  const response = await fetch(`${API_BASE_URL}/chat`, {
-    method: "POST",
-    headers: await buildAuthHeaders(),
-    body: JSON.stringify({
-      messages,
-      conversation_id: conversationId ?? undefined,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CHAT_REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/chat`, {
+      method: "POST",
+      headers: await buildAuthHeaders(),
+      body: JSON.stringify({
+        messages,
+        conversation_id: conversationId ?? undefined,
+      }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new ChatApiError(
+        "The chat service took too long to respond. Restart the backend and try again.",
+        504,
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     let detail = "Failed to reach the chat service.";

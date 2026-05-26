@@ -56,6 +56,8 @@ cd backend
 .\scripts\run.ps1
 ```
 
+If localhost hangs (Windows): stop the server (Ctrl+C), kill stray Python on port 8001, restart `run.ps1` (runs **without** `--reload` by default). Confirm http://localhost:8001/health returns `{"status":"ok"}` before using the frontend.
+
 Survey chat uses **OpenAI** with merged field extraction (corrections allowed, no re-asking filled fields).
 
 ## Features without login
